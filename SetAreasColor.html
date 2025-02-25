@@ -189,7 +189,7 @@
       try {
         const colorsResponse = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain" },
           body: JSON.stringify({ action: "getAreasColors" })
         });
         if (!colorsResponse.ok) throw new Error("Failed to fetch colors");
@@ -202,7 +202,7 @@
       try {
         const areasResponse = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain" },
           body: JSON.stringify({ action: "getFoundAreas" })
         });
         if (!areasResponse.ok) throw new Error("Failed to fetch areas");
@@ -270,7 +270,7 @@
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain" },
           body: JSON.stringify({ action: "saveAreaColor", areaName, colorValue })
         });
         if (!response.ok) throw new Error("Failed to save color");
@@ -278,7 +278,7 @@
         if (data.success) {
           const refreshResponse = await fetch(SCRIPT_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "text/plain" },
             body: JSON.stringify({ action: "getAreasColors" })
           });
           if (!refreshResponse.ok) throw new Error("Failed to refresh colors");

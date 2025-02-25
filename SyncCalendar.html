@@ -29,6 +29,7 @@
       width: 100%;
       background: rgba(255, 255, 255, 0.1);
       padding: 16px 32px;
+      box-sizing: border-box;
       text-align: center;
       font-family: 'Nunito Sans', sans-serif;
       font-size: 16px;
@@ -105,81 +106,75 @@
       color: #ffffff;
     }
     @media (max-width: 768px) {
-      .navbar {
-        padding: 12px 24px;
-        font-size: 14px;
-      }
-      .navbar a {
-        margin: 0 8px;
-      }
-      .content {
-        max-width: 90%;
-        padding: 24px;
-      }
-      .title {
-        font-size: 32px;
-      }
-      .progress {
-        width: 150px;
-      }
-      #status, .progress-text, .notifications {
-        font-size: 14px;
-      }
+      .navbar { padding: 12px 24px; font-size: 14px; }
+      .navbar a { margin: 0 8px; }
+      .content { max-width: 90%; padding: 24px; }
+      .title { font-size: 32px; }
+      .progress { width: 150px; }
+      #status, .progress-text, .notifications { font-size: 14px; }
     }
   </style>
   <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzW16vQi1MAoZIuLZAJ7PZDDGSZSqoMNq799Ess9_9L2RJDqXqh35AW1CTapIkA6y9J/exec"; // แทนที่ด้วย URL จาก Google Apps Script Web App
+
     async function startSync() {
-  const progressBar = document.getElementById("progress-bar");
-  const progressText = document.getElementById("progress-text");
-  const status = document.getElementById("status");
-  const notifications = document.getElementById("notifications");
+      const progressBar = document.getElementById("progress-bar");
+      const progressText = document.getElementById("progress-text");
+      const status = document.getElementById("status");
+      const notifications = document.getElementById("notifications");
 
-  progressBar.style.width = "0%";
-  progressText.innerText = "0%";
-  status.innerText = "Syncing...";
+      progressBar.style.width = "0%";
+      progressText.innerText = "0%";
+      status.innerText = "Syncing...";
 
-  let progress = 0;
-  const interval = setInterval(() => {
-    progress += 10;
-    if (progress <= 100) {
-      progressBar.style.width = progress + "%";
-      progressText.innerText = progress + "%";
-    }
-  }, 200);
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        if (progress <= 100) {
+          progressBar.style.width = progress + "%";
+          progressText.innerText = progress + "%";
+        }
+      }, 200);
 
-  try {
-    const response = await fetch("https://script.google.com/macros/s/AKfycbyOieb1KdV5SQ3-0U_Ti-gpjRBTjmXmBM2Si5mxx-Hq-IpMT7UIQZvak6LfjTh7qPxO/exec", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json"
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({ action: "syncNotionToGoogleCalendar" })
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+        clearInterval(interval);
+        progressBar.style.width = "100%";
+        progressText.innerText = "100%";
+        status.innerText = "Sync Completed Successfully!";
+
+        const notionEvents = data.notionEvents || 0;
+        const calendarEvents = data.calendarEvents || 0;
+        const alertEvents = data.alertEvents || 0;
+
+        notifications.innerHTML = `
+          <span>Notion events:</span> ${notionEvents}<br>
+          <span>Google Calendar events in range:</span> ${calendarEvents}<br>
+          <span>Alert:</span> ${alertEvents} events within 5 days of expiring
+        `;
+      } catch (error) {
+        clearInterval(interval);
+        status.innerText = "❌ Error: " + error.message;
+        console.error("Sync failed:", error);
       }
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
-    const data = await response.json();
-    clearInterval(interval);
-    progressBar.style.width = "100%";
-    progressText.innerText = "100%";
-    status.innerText = "Sync Completed Successfully!";
-
-    notifications.innerHTML = `
-      <span>Notion events:</span> ${data.notionEvents}<br>
-      <span>Google Calendar events in range:</span> ${data.calendarEvents}<br>
-      <span>Alert:</span> ${data.alertEvents} events within 5 days of expiring
-    `;
-
-  } catch (error) {
-    clearInterval(interval);
-    status.innerText = "❌ Error: " + error.message;
-  }
-}
-
+    window.onload = startSync;
   </script>
 </head>
-<body onload="startSync()">
+<body>
   <div class="navbar">
     <a href="?page=index">Sync</a>
     <a href="?page=areashex">Set Area Color</a>

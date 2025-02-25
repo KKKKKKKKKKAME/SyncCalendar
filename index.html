@@ -18,7 +18,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      overflow: hidden;
+      overflow: auto; /* เปลี่ยนเป็น auto เพื่อให้ scroll ได้ */
     }
     @keyframes gradientBG {
       0% { background-position: 0% 50%; }
@@ -98,86 +98,98 @@
       font-size: 16px;
       font-weight: 400;
       color: #f8f8f8;
-      text-align: center;
+      text-align: left; /* ปรับเป็น left เพื่อให้ log อ่านง่าย */
       line-height: 1.5;
+      max-height: 300px; /* จำกัดความสูง */
+      overflow-y: auto; /* เพิ่ม scroll ถ้าเกิน */
+      background: rgba(255, 255, 255, 0.1); /* เพิ่มพื้นหลังให้ดูชัด */
+      padding: 10px;
+      border-radius: 4px;
     }
     .notifications span {
       font-weight: 500;
       color: #ffffff;
     }
     @media (max-width: 768px) {
-      .navbar { padding: 12px 24px; font-size: 14px; }
-      .navbar a { margin: 0 8px; }
-      .content { max-width: 90%; padding: 24px; }
-      .title { font-size: 32px; }
-      .progress { width: 150px; }
-      #status, .progress-text, .notifications { font-size: 14px; }
+      .navbar {
+        padding: 12px 24px;
+        font-size: 14px;
+      }
+      .navbar a {
+        margin: 0 8px;
+      }
+      .content {
+        max-width: 90%;
+        padding: 24px;
+      }
+      .title {
+        font-size: 32px;
+      }
+      .progress {
+        width: 150px;
+      }
+      #status, .progress-text, .notifications {
+        font-size: 14px;
+      }
     }
   </style>
   <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFEtcgDJO3muyc5wEV1YUbw9JAitSr53UetKfJirZ5sxBfJ5mjQyNa1LVlmK8RpsM/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8URgURQgA5pi8hANXCiAzrPX0-WFMXKj-QuWwzf-5fcH48ACavth6zw9fa-l2GpX2/exec";
 
-async function startSync() {
-  const progressBar = document.getElementById("progress-bar");
-  const progressText = document.getElementById("progress-text");
-  const status = document.getElementById("status");
-  const notifications = document.getElementById("notifications");
+    async function startSync() {
+      const progressBar = document.getElementById("progress-bar");
+      const progressText = document.getElementById("progress-text");
+      const status = document.getElementById("status");
+      const notifications = document.getElementById("notifications");
 
-  progressBar.style.width = "0%";
-  progressText.innerText = "0%";
-  status.innerText = "Syncing...";
+      progressBar.style.width = "0%";
+      progressText.innerText = "0%";
+      status.innerText = "Syncing...";
 
-  let progress = 0;
-  const interval = setInterval(() => {
-    progress += 10;
-    if (progress <= 100) {
-      progressBar.style.width = progress + "%";
-      progressText.innerText = progress + "%";
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        if (progress <= 100) {
+          progressBar.style.width = progress + "%";
+          progressText.innerText = progress + "%";
+        }
+      }, 200);
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "syncNotionToGoogleCalendar" })
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+        clearInterval(interval);
+        progressBar.style.width = "100%";
+        progressText.innerText = "100%";
+        status.innerText = data.message;
+
+        const notionEvents = data.notionEvents || 0;
+        const calendarEvents = data.calendarEvents || 0;
+        const alertEvents = data.alertEvents || 0;
+        const logs = data.logs || [];
+
+        notifications.innerHTML = `
+          <span>Notion events:</span> ${notionEvents}<br>
+          <span>Google Calendar events in range:</span> ${calendarEvents}<br>
+          <span>Alert:</span> ${alertEvents} events within 5 days of expiring<br>
+          ${logs.length > 0 ? '<br><strong>Details:</strong><br>' + logs.join('<br>') : ''}
+        `;
+      } catch (error) {
+        clearInterval(interval);
+        status.innerText = `❌ Error: ${error.message}`;
+        console.error("Sync failed:", error);
+        notifications.innerHTML = "Please check the console for more details.";
+      }
     }
-  }, 200);
 
-  try {
-    console.log("Starting fetch to:", SCRIPT_URL);
-    const response = await fetch(SCRIPT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify({ action: "syncNotionToGoogleCalendar" })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log("Response data:", data);
-
-    clearInterval(interval);
-    progressBar.style.width = "100%";
-    progressText.innerText = "100%";
-    status.innerText = "Sync Completed Successfully!";
-
-    const notionEvents = data.notionEvents || 0;
-    const calendarEvents = data.calendarEvents || 0;
-    const alertEvents = data.alertEvents || 0;
-
-    notifications.innerHTML = `
-      <span>Notion events:</span> ${notionEvents}<br>
-      <span>Google Calendar events:</span> ${calendarEvents}<br>
-      <span>Alert:</span> ${alertEvents} events within 5 days of expiring
-    `;
-  } catch (error) {
-    clearInterval(interval);
-    status.innerText = `❌ Error: ${error.message}`;
-    console.error("Fetch failed:", error);
-    notifications.innerHTML = "Please check the console for more details.";
-  }
-}
-
-window.onload = startSync;
+    window.onload = startSync;
   </script>
 </head>
 <body>

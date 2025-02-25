@@ -6,32 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito+Sans:wght@400;500&family=Poppins:wght@700&display=swap" rel="stylesheet">
   <style>
-    ถ้าคุณเจอข้อผิดพลาด "❌ Error: Failed to fetch" นั่นแสดงว่า fetch request ไม่สำเร็จ ซึ่งอาจเกิดจากหลายสาเหตุ เช่น CORS ยังไม่ถูกตั้งค่าถูกต้อง, URL ไม่ถูกต้อง, หรือ server ไม่ตอบสนอง ผมจะช่วยวิเคราะห์และแก้ไขให้ครับ โดยเราจะเพิ่มการดีบักและปรับปรุงโค้ดให้แข็งแกร่งขึ้น
-
-สาเหตุที่เป็นไปได้และวิธีแก้ไข
-CORS ไม่ถูกตั้งค่าถูกต้องใน Google Apps Script
-ตรวจสอบว่า Google Apps Script Web App ส่ง header Access-Control-Allow-Origin กลับมาถูกต้องหรือไม่
-URL ของ Google Apps Script Web App ไม่ถูกต้อง
-ตรวจสอบว่า SCRIPT_URL ใน HTML ถูกต้องและเข้าถึงได้
-Google Apps Script Web App ไม่ได้ deploy หรือตั้งค่าไม่ถูกต้อง
-ต้อง deploy ใหม่และตั้งค่าให้ "Who has access" เป็น "Anyone"
-Network หรือ Server Error
-อาจมีปัญหาการเชื่อมต่อหรือ rate limit
-ปรับปรุง HTML เพื่อดีบักและจัดการข้อผิดพลาด
-ผมจะเพิ่มการ log ข้อมูลเพิ่มเติมใน console และปรับ fetch ให้แสดง error ชัดเจนขึ้น:
-
-html
-Wrap
-Copy
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Notion & Google Calendar Sync</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito+Sans:wght@400;500&family=Poppins:wght@700&display=swap" rel="stylesheet">
-  <style>
-    /* คงสไตล์เดิมไว้เหมือนในโค้ดก่อนหน้า */
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
@@ -141,7 +115,7 @@ Copy
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw8URgURQgA5pi8hANXCiAzrPX0-WFMXKj-QuWwzf-5fcH48ACavth6zw9fa-l2GpX2/exec"; // แทนที่ด้วย URL จริง
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxmhriEHVsygYdu_qs1OCjOJcmzwnpPrDHUMdg8iS-6IHowZ6PUtP_hQ64DPmXY4wYu/execL"; // แทนที่ด้วย URL จริง
 
     async function startSync() {
       const progressBar = document.getElementById("progress-bar");

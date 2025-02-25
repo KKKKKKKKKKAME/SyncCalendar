@@ -115,71 +115,69 @@
     }
   </style>
   <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxmhriEHVsygYdu_qs1OCjOJcmzwnpPrDHUMdg8iS-6IHowZ6PUtP_hQ64DPmXY4wYu/execL"; // แทนที่ด้วย URL จริง
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzmc69fTwyC3w8Ovr_8-kxJaygF6TCHEnvNQxXAZ6Uezq4gfQHaS1cDzPIBbxEAFpm6/exec";
 
-    async function startSync() {
-      const progressBar = document.getElementById("progress-bar");
-      const progressText = document.getElementById("progress-text");
-      const status = document.getElementById("status");
-      const notifications = document.getElementById("notifications");
+async function startSync() {
+  const progressBar = document.getElementById("progress-bar");
+  const progressText = document.getElementById("progress-text");
+  const status = document.getElementById("status");
+  const notifications = document.getElementById("notifications");
 
-      progressBar.style.width = "0%";
-      progressText.innerText = "0%";
-      status.innerText = "Syncing...";
+  progressBar.style.width = "0%";
+  progressText.innerText = "0%";
+  status.innerText = "Syncing...";
 
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        if (progress <= 100) {
-          progressBar.style.width = progress + "%";
-          progressText.innerText = progress + "%";
-        }
-      }, 200);
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += 10;
+    if (progress <= 100) {
+      progressBar.style.width = progress + "%";
+      progressText.innerText = progress + "%";
+    }
+  }, 200);
 
-      try {
-        console.log("Starting fetch to:", SCRIPT_URL);
-        const response = await fetch(SCRIPT_URL, {
-          method: "POST",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify({ action: "syncNotionToGoogleCalendar" })
-        });
+  try {
+    console.log("Starting fetch to:", SCRIPT_URL);
+    const response = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({ action: "syncNotionToGoogleCalendar" })
+    });
 
-        console.log("Response status:", response.status);
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
-        }
-
-        const data = await response.json();
-        console.log("Response data:", data);
-
-        clearInterval(interval);
-        progressBar.style.width = "100%";
-        progressText.innerText = "100%";
-        status.innerText = "Sync Completed Successfully!";
-
-        const notionEvents = data.notionEvents || 0;
-        const calendarEvents = data.calendarEvents || 0;
-        const alertEvents = data.alertEvents || 0;
-
-        notifications.innerHTML = `
-          <span>Notion events:</span> ${notionEvents}<br>
-          <span>Google Calendar events in range:</span> ${calendarEvents}<br>
-          <span>Alert:</span> ${alertEvents} events within 5 days of expiring
-        `;
-      } catch (error) {
-        clearInterval(interval);
-        status.innerText = `❌ Error: ${error.message}`;
-        console.error("Fetch failed:", error);
-        notifications.innerHTML = "Please check the console for more details.";
-      }
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
     }
 
-    window.onload = startSync;
+    const data = await response.json();
+    console.log("Response data:", data);
+
+    clearInterval(interval);
+    progressBar.style.width = "100%";
+    progressText.innerText = "100%";
+    status.innerText = "Sync Completed Successfully!";
+
+    const notionEvents = data.notionEvents || 0;
+    const calendarEvents = data.calendarEvents || 0;
+    const alertEvents = data.alertEvents || 0;
+
+    notifications.innerHTML = `
+      <span>Notion events:</span> ${notionEvents}<br>
+      <span>Google Calendar events in range:</span> ${calendarEvents}<br>
+      <span>Alert:</span> ${alertEvents} events within 5 days of expiring
+    `;
+  } catch (error) {
+    clearInterval(interval);
+    status.innerText = `❌ Error: ${error.message}`;
+    console.error("Fetch failed:", error);
+    notifications.innerHTML = "Please check the console for more details.";
+  }
+}
+
+window.onload = startSync;
   </script>
 </head>
 <body>

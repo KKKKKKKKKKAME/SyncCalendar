@@ -18,7 +18,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      overflow: auto; /* เปลี่ยนเป็น auto เพื่อให้ scroll ได้ */
+      overflow: auto;
     }
     @keyframes gradientBG {
       0% { background-position: 0% 50%; }
@@ -98,12 +98,10 @@
       font-size: 16px;
       font-weight: 400;
       color: #f8f8f8;
-      text-align: left; /* ปรับเป็น left เพื่อให้ log อ่านง่าย */
+      text-align: center;
       line-height: 1.5;
-      max-height: 300px; /* จำกัดความสูง */
-      overflow-y: auto; /* เพิ่ม scroll ถ้าเกิน */
-      background: rgba(255, 255, 255, 0.1); /* เพิ่มพื้นหลังให้ดูชัด */
-      padding: 10px;
+      max-height: 300px;
+      overflow-y: auto;
       border-radius: 4px;
     }
     .notifications span {
@@ -134,7 +132,7 @@
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzCb37zP-qvGX7jAmJ-YV62jNoJmT-5hxDQxM8qBbgK2GFX4um7wcHjsGeze5Y-XKKX/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzY6eOLj1FGYsZsar3uk1Y3Swtj7zKvrbUB_BlwXfdp5OqQct-zTbIDPwhC1hLmrIeQ/exec";
 
     async function startSync() {
       const progressBar = document.getElementById("progress-bar");
@@ -158,7 +156,7 @@
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain" },
+          headers: { "Content-Type": "text/plain" }, // เปลี่ยนกลับเป็น application/json
           body: JSON.stringify({ action: "syncNotionToGoogleCalendar" })
         });
 
@@ -170,17 +168,9 @@
         progressText.innerText = "100%";
         status.innerText = data.message;
 
-        const notionEvents = data.notionEvents || 0;
-        const calendarEvents = data.calendarEvents || 0;
-        const alertEvents = data.alertEvents || 0;
         const logs = data.logs || [];
 
-        notifications.innerHTML = `
-          <span>Notion events:</span> ${notionEvents}<br>
-          <span>Google Calendar events in range:</span> ${calendarEvents}<br>
-          <span>Alert:</span> ${alertEvents} events within 5 days of expiring<br>
-          ${logs.length > 0 ? '<br><strong>Details:</strong><br>' + logs.join('<br>') : ''}
-        `;
+        notifications.innerHTML = logs.join('<br>');
       } catch (error) {
         clearInterval(interval);
         status.innerText = `❌ Error: ${error.message}`;

@@ -178,11 +178,19 @@
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFEtcgDJO3muyc5wEV1YUbw9JAitSr53UetKfJirZ5sxBfJ5mjQyNa1LVlmK8RpsM/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFWbcHG-sf-lIZ6_BunIXNaK_bFCvmu4e6Orzr1ZFNCN_SyXkBnuhl1z5fAeZ7Ax_m/exec";
     const colorMap = {
-      "1": "#A4BDFC", "2": "#9FC6A8", "3": "#B18CD9", "4": "#F28FAD", "5": "#F7E59F",
-      "6": "#EB8777", "7": "#FABB72", "8": "#4AB7BD", "9": "#CACDD1", "10": "#4986E7",
-      "11": "#7BCFA6"
+      "1": "#7986CB",  // Lavender
+      "2": "#33B679",  // Sage
+      "3": "#8E24AA",  // Grape
+      "4": "#E67C73",  // Flamingo
+      "5": "#F6BF26",  // Banana
+      "6": "#F5511D",  // Tangerine
+      "7": "#039BE5",  // Peacock
+      "8": "#616161",  // Graphite
+      "9": "#3F51B5",  // Blueberry
+      "10": "#0B8043", // Basil
+      "11": "#D81B60"  // Tomato
     };
 
     window.onload = async function() {
@@ -333,17 +341,17 @@
       <input type="text" id="customAreaName" placeholder="Or type new Area" style="display: none;" />
       <label>Color</label>
       <select id="colorValue">
-        <option value="1">Lavender (#A4BDFC)</option>
-        <option value="2">Sage (#9FC6A8)</option>
-        <option value="3">Grape (#B18CD9)</option>
-        <option value="4">Flamingo (#F28FAD)</option>
-        <option value="5">Banana (#F7E59F)</option>
-        <option value="6">Tomato (#EB8777)</option>
-        <option value="7">Tangerine (#FABB72)</option>
-        <option value="8">Peacock (#4AB7BD)</option>
-        <option value="9">Graphite (#CACDD1)</option>
-        <option value="10">Blueberry (#4986E7)</option>
-        <option value="11">Basil (#7BCFA6)</option>
+        <option value="1">Lavender (#7986CB)</option>
+        <option value="2">Sage (#33B679)</option>
+        <option value="3">Grape (#8E24AA)</option>
+        <option value="4">Flamingo (#E67C73)</option>
+        <option value="5">Banana (#F6BF26)</option>
+        <option value="6">Tangerine (#F5511D)</option>
+        <option value="7">Peacock (#039BE5)</option>
+        <option value="8">Graphite (#616161)</option>
+        <option value="9">Blueberry (#3F51B5)</option>
+        <option value="10">Basil (#0B8043)</option>
+        <option value="11">Tomato (#D81B60)</option>
       </select>
       <button onclick="saveAreaColor()">Save</button>
     </div>

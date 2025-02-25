@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manage Areas Colors</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito+Sans:wght@400;500&family=Poppins:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(90deg, #9ABED9, #E3DEEE);
+      background-size: 200% 200%;
+      animation: gradientBG 8s ease infinite;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: auto;
+    }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .navbar {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 16px 32px;
+      box-sizing: border-box;
+      text-align: center;
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+    }
+    .navbar a {
+      color: #014871;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .navbar a:hover {
+      color: #ffffff;
+    }
+    .content {
+      text-align: center;
+      width: 100%;
+      max-width: 480px;
+      padding: 32px;
+      box-sizing: border-box;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 40px;
+      font-weight: 700;
+      color: #333333;
+      margin-bottom: 24px;
+      line-height: 1.2;
+    }
+    .form-group {
+      margin: 24px 0;
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: #f8f8f8;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #014871;
+    }
+    .form-group select, .form-group input {
+      width: 100%;
+      max-width: 300px;
+      padding: 8px;
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #333333;
+      margin-bottom: 12px;
+    }
+    .form-group button {
+      padding: 10px 20px;
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: #ffffff;
+      background: #014871;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .form-group button:hover {
+      background: #026298;
+    }
+    table {
+      width: 100%;
+      max-width: 480px;
+      border-collapse: collapse;
+      margin-top: 24px;
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 16px;
+      color: #f8f8f8;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    th {
+      background-color: rgba(255, 255, 255, 0.2);
+      font-weight: 500;
+      color: #014871;
+    }
+    td {
+      font-weight: 400;
+    }
+    .color-preview {
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+      border-radius: 2px;
+    }
+    table button {
+      padding: 6px 12px;
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: #ffffff;
+      background: #014871;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    table button:hover {
+      background: #026298;
+    }
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 12px 24px;
+        font-size: 14px;
+      }
+      .content {
+        max-width: 90%;
+        padding: 24px;
+      }
+      .title {
+        font-size: 32px;
+      }
+      .form-group select, .form-group input {
+        max-width: 100%;
+      }
+      table {
+        font-size: 14px;
+      }
+      th, td {
+        padding: 8px;
+      }
+      table button {
+        font-size: 12px;
+        padding: 4px 8px;
+      }
+    }
+  </style>
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwBfFUTEu0pBoSNO9k3cBIOuD5bYhvaXVFwUgoYG8jsuL_Le81AmXuDTW4OBuqZ1oVO/exec";
+    const colorMap = {
+      "1": "#A4BDFC", "2": "#9FC6A8", "3": "#B18CD9", "4": "#F28FAD", "5": "#F7E59F",
+      "6": "#EB8777", "7": "#FABB72", "8": "#4AB7BD", "9": "#CACDD1", "10": "#4986E7",
+      "11": "#7BCFA6"
+    };
+
+    window.onload = async function() {
+      try {
+        const colorsResponse = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "getAreasColors" })
+        });
+        if (!colorsResponse.ok) throw new Error("Failed to fetch colors");
+        const areas = await colorsResponse.json();
+        displayAreas(areas);
+      } catch (error) {
+        alert("Error loading colors: " + error.message);
+      }
+
+      try {
+        const areasResponse = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "getFoundAreas" })
+        });
+        if (!areasResponse.ok) throw new Error("Failed to fetch areas");
+        const areasList = await areasResponse.json();
+        populateAreasDropdown(areasList);
+      } catch (error) {
+        console.error("Error loading areas:", error);
+        alert("Error loading areas: " + error.message);
+      }
+    };
+
+    function displayAreas(areas) {
+      const table = document.getElementById("areasTable");
+      while (table.rows.length > 1) table.deleteRow(1);
+      for (let area in areas) {
+        const row = table.insertRow();
+        const cell1 = row.insertCell(0);
+        const cell2 = row.insertCell(1);
+        const cell3 = row.insertCell(2);
+        cell1.innerText = area;
+        const colorId = areas[area];
+        const colorHex = colorMap[colorId] || "#000000";
+        cell2.innerHTML = `<span class="color-preview" style="background-color: ${colorHex};"></span> ID: ${colorId} (${colorHex})`;
+        cell3.innerHTML = `<button onclick="deleteArea('${area}')">Delete</button>`;
+      }
+    }
+
+    function populateAreasDropdown(areas) {
+      console.log("Received areas:", areas);
+      const select = document.getElementById("areaName");
+      areas.forEach(area => {
+        const option = document.createElement("option");
+        option.value = area;
+        option.text = area;
+        select.appendChild(option);
+      });
+
+      select.addEventListener("change", function() {
+        const customInput = document.getElementById("customAreaName");
+        if (this.value === "") {
+          customInput.style.display = "inline";
+          customInput.focus();
+        } else {
+          customInput.style.display = "none";
+          customInput.value = "";
+        }
+      });
+    }
+
+    async function saveAreaColor() {
+      const select = document.getElementById("areaName");
+      const customInput = document.getElementById("customAreaName");
+      const colorValue = document.getElementById("colorValue").value;
+      let areaName = select.value;
+
+      if (areaName === "" && customInput.value.trim()) {
+        areaName = customInput.value.trim();
+      }
+
+      if (!areaName || !colorValue) {
+        alert("Please select or enter an Area Name and select a Color");
+        return;
+      }
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "saveAreaColor", areaName, colorValue })
+        });
+        if (!response.ok) throw new Error("Failed to save color");
+        const data = await response.json();
+        if (data.success) {
+          const refreshResponse = await fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "getAreasColors" })
+          });
+          if (!refreshResponse.ok) throw new Error("Failed to refresh colors");
+          const refreshedAreas = await refreshResponse.json();
+          displayAreas(refreshedAreas);
+          select.value = "";
+          customInput.value = "";
+          customInput.style.display = "none";
+          document.getElementById("colorValue").value = "1";
+        } else {
+          alert("Error saving data: " + data.error);
+        }
+      } catch (error) {
+        alert("Error saving data: " + error.message);
+      }
+    }
+
+    async function deleteArea(area) {
+      if (confirm(`Delete ${area}?`)) {
+        try {
+          const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ action: "deleteAreaColor", areaName: area })
+          });
+          if (!response.ok) throw new Error("Failed to delete color");
+          const data = await response.json();
+          if (data.success) {
+            displayAreas(data);
+          } else {
+            alert("Error deleting data: " + data.error);
+          }
+        } catch (error) {
+          alert("Error deleting data: " + error.message);
+        }
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="navbar">
+    <a href="index.html">Back to Notion & Calendar Sync</a>
+  </div>
+  <div class="content">
+    <div class="title">Manage Areas Colors</div>
+    <div class="form-group">
+      <label>Area Name</label>
+      <select id="areaName">
+        <option value="">-- Select or type new Area --</option>
+        <option value="Not found Areas">Not found Areas</option>
+      </select>
+      <input type="text" id="customAreaName" placeholder="Or type new Area" style="display: none;" />
+      <label>Color</label>
+      <select id="colorValue">
+        <option value="1">Lavender (#A4BDFC)</option>
+        <option value="2">Sage (#9FC6A8)</option>
+        <option value="3">Grape (#B18CD9)</option>
+        <option value="4">Flamingo (#F28FAD)</option>
+        <option value="5">Banana (#F7E59F)</option>
+        <option value="6">Tomato (#EB8777)</option>
+        <option value="7">Tangerine (#FABB72)</option>
+        <option value="8">Peacock (#4AB7BD)</option>
+        <option value="9">Graphite (#CACDD1)</option>
+        <option value="10">Blueberry (#4986E7)</option>
+        <option value="11">Basil (#7BCFA6)</option>
+      </select>
+      <button onclick="saveAreaColor()">Save</button>
+    </div>
+    <table id="areasTable">
+      <tr><th>Area Name</th><th>Color</th><th>Action</th></tr>
+    </table>
+  </div>
+</body>
+</html>

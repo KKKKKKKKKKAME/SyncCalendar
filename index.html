@@ -9,7 +9,7 @@
   <meta name="google-signin-client_id" content="847566218770-pic8snut7tkcu4dmtqtqo6ij170c0447.apps.googleusercontent.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito+Sans:wght@400;500&family=Poppins:wght@700&display=swap" rel="stylesheet">
-  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -137,11 +137,11 @@
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBSYozr98R4y069GlS1vhYnW5fYzIMxUM1sSMBZgR_jaA9lyCF5u8KSSfOdbhsyh_Y/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxDzFz8EWFKL4B3SVU-zS_rCb6FI-DDIyJ9IhKcr8Yx8WIUu_oWUKTUDL6JGNyc1WXj/exec";
 
-    function onSignIn(googleUser) {
+    function onSignIn(response) {
       console.log("Sign-in successful");
-      const id_token = googleUser.getAuthResponse().id_token;
+      const id_token = response.credential;
       localStorage.setItem("googleToken", id_token);
       document.getElementById("loginDiv").style.display = "none";
       document.getElementById("content").style.display = "block";
@@ -151,14 +151,11 @@
 
     function signOut() {
       console.log("Signing out");
-      const auth2 = gapi.auth2.getAuthInstance();
-      auth2.signOut().then(() => {
-        localStorage.removeItem("googleToken");
-        document.getElementById("loginDiv").style.display = "block";
-        document.getElementById("content").style.display = "none";
-      });
+      google.accounts.id.disableAutoSelect();
+      localStorage.removeItem("googleToken");
+      document.getElementById("loginDiv").style.display = "block";
+      document.getElementById("content").style.display = "none";
     }
-
     async function startSync() {
       console.log("Starting sync");
       const token = localStorage.getItem("googleToken");
@@ -220,6 +217,20 @@
 
     window.onload = function() {
       console.log("Page loaded");
+      google.accounts.id.initialize({
+        client_id: "847566218770-pic8snut7tkcu4dmtqtqo6ij170c0447.apps.googleusercontent.com",
+        callback: onSignIn
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById("google-signin-button"),
+        {
+          theme: "outline",
+          size: "large",
+          text: "sign_in_with"
+        }
+      );
+
       const token = localStorage.getItem("googleToken");
       if (token) {
         console.log("Existing token found:", token);
@@ -227,7 +238,7 @@
         document.getElementById("content").style.display = "block";
         startSync();
       }
-    }
+    };
   </script>
 </head>
 <body>
@@ -238,7 +249,7 @@
     </div>
     <div class="content">
       <div class="title">Please Log In</div>
-      <div class="g-signin2" data-onsuccess="onSignIn"></div>
+      <div id="google-signin-button"></div> <!-- ปุ่ม Sign-In -->
     </div>
   </div>
   <div id="content" style="display: none;">

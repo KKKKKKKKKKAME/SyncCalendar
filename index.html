@@ -135,8 +135,7 @@
     }
   </style>
   <script>
-    <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzr1rPxflg8QI6vvdx80kVecxIBX3X4RruNsPcJeFvoBp_ftNYoET1FogSq3voms-U/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9XPo87zxSBmJpaXQ80gOzWsfjD4EpRKyI4hzN5Jp9YWOKLKWP-gWFsg9LPM8OBEYH/exec";
 
     async function startSync() {
       const progressBar = document.getElementById("progress-bar");
@@ -162,17 +161,23 @@
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
           headers: { 
-            "Content-Type": "text/plain",
-            "Origin": "https://kkkkkkkkkkame.github.io/SyncCalendar" // เพิ่ม Origin header ชัดเจน
+            "Content-Type": "text/plain"
+            // ลบ "Origin" ออก เพราะเบราว์เซอร์จะใส่ให้อัตโนมัติ
           },
           body: JSON.stringify({ action: "syncNotionToGoogleCalendar" })
         });
 
         console.log("Response status:", response.status);
-        const text = await response.text(); // ดึง response เป็น text ก่อนเพื่อ debug
+        const text = await response.text();
         console.log("Raw response:", text);
 
-        const data = JSON.parse(text); // แปลงเป็น JSON หลังจาก log
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          throw new Error(`Invalid JSON response: ${text}`);
+        }
+
         clearInterval(interval);
         progressBar.style.width = "100%";
         progressText.innerText = "100%";

@@ -2,14 +2,9 @@
 <html>
 <head>
   <title>Notion & Google Calendar Sync</title>
-  <link rel="icon" href="https://kkkkkkkkkkame.github.io/SyncCalendar/favicon-16x16.png" sizes="16x16" type="image/png">
-  <link rel="icon" href="https://kkkkkkkkkkame.github.io/SyncCalendar/favicon-32x32.png" sizes="32x32" type="image/png">
-  <link rel="icon" href="https://kkkkkkkkkkame.github.io/SyncCalendar/favicon-48x48.png" sizes="48x48" type="image/png">
   <meta charset="UTF-8">
-  <meta name="google-signin-client_id" content="847566218770-pic8snut7tkcu4dmtqtqo6ij170c0447.apps.googleusercontent.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito+Sans:wght@400;500&family=Poppins:wght@700&display=swap" rel="stylesheet">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -23,7 +18,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      overflow: auto;
+      overflow: hidden;
     }
     @keyframes gradientBG {
       0% { background-position: 0% 50%; }
@@ -105,171 +100,99 @@
       color: #f8f8f8;
       text-align: center;
       line-height: 1.5;
-      max-height: 300px;
-      overflow-y: auto;
-      border-radius: 4px;
     }
     .notifications span {
       font-weight: 500;
       color: #ffffff;
     }
     @media (max-width: 768px) {
-      .navbar {
-        padding: 12px 24px;
-        font-size: 14px;
-      }
-      .navbar a {
-        margin: 0 8px;
-      }
-      .content {
-        max-width: 90%;
-        padding: 24px;
-      }
-      .title {
-        font-size: 32px;
-      }
-      .progress {
-        width: 150px;
-      }
-      #status, .progress-text, .notifications {
-        font-size: 14px;
-      }
+      .navbar { padding: 12px 24px; font-size: 14px; }
+      .navbar a { margin: 0 8px; }
+      .content { max-width: 90%; padding: 24px; }
+      .title { font-size: 32px; }
+      .progress { width: 150px; }
+      #status, .progress-text, .notifications { font-size: 14px; }
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwOReuujZq_1XlAY_Q7KeeHHK9RVHSB2C3aZY1theoX5zLOuk_V8hBiKbPY1y983nkl/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFEtcgDJO3muyc5wEV1YUbw9JAitSr53UetKfJirZ5sxBfJ5mjQyNa1LVlmK8RpsM/exec";
 
-    function onSignIn(response) {
-      console.log("Sign-in successful");
-      const id_token = response.credential;
-      localStorage.setItem("googleToken", id_token);
-      document.getElementById("loginDiv").style.display = "none";
-      document.getElementById("content").style.display = "block";
-      console.log("Calling startSync()");
-      startSync();
+async function startSync() {
+  const progressBar = document.getElementById("progress-bar");
+  const progressText = document.getElementById("progress-text");
+  const status = document.getElementById("status");
+  const notifications = document.getElementById("notifications");
+
+  progressBar.style.width = "0%";
+  progressText.innerText = "0%";
+  status.innerText = "Syncing...";
+
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += 10;
+    if (progress <= 100) {
+      progressBar.style.width = progress + "%";
+      progressText.innerText = progress + "%";
+    }
+  }, 200);
+
+  try {
+    console.log("Starting fetch to:", SCRIPT_URL);
+    const response = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({ action: "syncNotionToGoogleCalendar" })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
     }
 
-    function signOut() {
-      console.log("Signing out");
-      google.accounts.id.disableAutoSelect();
-      localStorage.removeItem("googleToken");
-      document.getElementById("loginDiv").style.display = "block";
-      document.getElementById("content").style.display = "none";
-    }
-    async function startSync() {
-      console.log("Starting sync");
-      const token = localStorage.getItem("googleToken");
-      if (!token) {
-        document.getElementById("status").innerText = "Please log in first!";
-        console.log("No token found");
-        return;
-      }
-      console.log("Token found:", token);
+    const data = await response.json();
+    console.log("Response data:", data);
 
-      const progressBar = document.getElementById("progress-bar");
-      const progressText = document.getElementById("progress-text");
-      const status = document.getElementById("status");
-      const notifications = document.getElementById("notifications");
+    clearInterval(interval);
+    progressBar.style.width = "100%";
+    progressText.innerText = "100%";
+    status.innerText = "Sync Completed Successfully!";
 
-      progressBar.style.width = "0%";
-      progressText.innerText = "0%";
-      status.innerText = "Syncing...";
+    const notionEvents = data.notionEvents || 0;
+    const calendarEvents = data.calendarEvents || 0;
+    const alertEvents = data.alertEvents || 0;
 
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        if (progress <= 100) {
-          progressBar.style.width = progress + "%";
-          progressText.innerText = progress + "%";
-        }
-      }, 200);
+    notifications.innerHTML = `
+      <span>Notion events:</span> ${notionEvents}<br>
+      <span>Google Calendar events:</span> ${calendarEvents}<br>
+      <span>Alert:</span> ${alertEvents} events within 5 days of expiring
+    `;
+  } catch (error) {
+    clearInterval(interval);
+    status.innerText = `❌ Error: ${error.message}`;
+    console.error("Fetch failed:", error);
+    notifications.innerHTML = "Please check the console for more details.";
+  }
+}
 
-      try {
-        console.log("Fetching data from GAS");
-        const response = await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain", // แก้จาก text/plain เป็น application/json
-            "Authorization": "Bearer " + token
-          },
-          body: JSON.stringify({ action: "syncNotionToGoogleCalendar" })
-        });
-
-        console.log("Response status:", response.status);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-        const data = await response.json();
-        console.log("Data received:", data);
-        clearInterval(interval);
-        progressBar.style.width = "100%";
-        progressText.innerText = "100%";
-        status.innerText = data.message;
-
-        const logs = data.logs || [];
-        notifications.innerHTML = logs.join('<br>');
-      } catch (error) {
-        
-        clearInterval(interval);
-        console.error("Full error:", error);
-        console.log("Response:", await response.text()); // เพิ่มบรรทัดนี้
-        status.innerText = `❌ Error: ${error.message}`;
-        console.error("Sync failed:", error);
-        notifications.innerHTML = "Please check the console for more details.";
-      }
-    }
-
-    window.onload = function() {
-      console.log("Page loaded");
-      google.accounts.id.initialize({
-        client_id: "847566218770-pic8snut7tkcu4dmtqtqo6ij170c0447.apps.googleusercontent.com",
-        callback: onSignIn
-      });
-
-      google.accounts.id.renderButton(
-        document.getElementById("google-signin-button"),
-        {
-          theme: "outline",
-          size: "large",
-          text: "sign_in_with"
-        }
-      );
-
-      const token = localStorage.getItem("googleToken");
-      if (token) {
-        console.log("Existing token found:", token);
-        document.getElementById("loginDiv").style.display = "none";
-        document.getElementById("content").style.display = "block";
-        startSync();
-      }
-    };
+window.onload = startSync;
   </script>
 </head>
 <body>
-  <div id="loginDiv" style="display: block;">
-    <div class="navbar">
-      <a href="index.html">Sync</a>
-      <a href="SetAreasColor.html">Set Area Color</a>
-    </div>
-    <div class="content">
-      <div class="title">Please Log In</div>
-      <div id="google-signin-button"></div> <!-- ปุ่ม Sign-In -->
-    </div>
+  <div class="navbar">
+    <a href="index.html">Sync</a>
+    <a href="SetAreasColor.html">Set Area Color</a>
   </div>
-  <div id="content" style="display: none;">
-    <div class="navbar">
-      <a href="index.html">Sync</a>
-      <a href="SetAreasColor.html">Set Area Color</a>
-      <a href="#" onclick="signOut()">Sign Out</a>
+  <div class="content">
+    <div class="title">Notion & Calendar Sync</div>
+    <div class="progress">
+      <div id="progress-bar" class="progress-bar"></div>
     </div>
-    <div class="content">
-      <div class="title">Notion & Calendar Sync</div>
-      <div class="progress">
-        <div id="progress-bar" class="progress-bar"></div>
-      </div>
-      <div id="progress-text" class="progress-text">0%</div>
-      <div id="status"></div>
-      <div id="notifications" class="notifications"></div>
-    </div>
+    <div id="progress-text" class="progress-text">0%</div>
+    <div id="status"></div>
+    <div id="notifications" class="notifications"></div>
   </div>
 </body>
 </html>

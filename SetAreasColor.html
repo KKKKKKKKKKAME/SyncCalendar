@@ -188,7 +188,7 @@
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHe6GODFHvFv4pO2yMhHa1IpSPdkzTotZdSDE-XwkFYApPKzsZq7lVGAbHn26AbCnb/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHT24tc03L3rdznfZwu0sflUaAUAVx8NNgDenWWkRlgV7kunatB3oeuaEmxR8uwy0T/exec";
     const colorMap = {
       "1": "#7986CB",  // Lavender
       "2": "#33B679",  // Sage
@@ -320,7 +320,6 @@
 
     async function deleteArea(area) {
       if (confirm(`Delete ${area}?`)) {
-        try {
           const response = await fetch(SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain" },

@@ -190,7 +190,7 @@
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6mGXhL6HiMVp0zyL5xEp8F8WnYfEfeTdj-KCYFNNTmis9dxmpuq1N0s_EkFV_3UDV/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-phgCRB4thjYDWyeicWjrRMS7eTvFVi6J_XSD2pmYbMCxSNSZOKh0aBFlbsxgmPNZ/exec";
     const colorMap = {
       "1": "#7986CB",  // Lavender
       "2": "#33B679",  // Sage
@@ -206,10 +206,19 @@
     };
 
     window.onload = async function() {
+      const token = localStorage.getItem("googleToken");
+      if (!token) {
+        window.location.href = "index.html"; // กลับไปหน้า login ถ้าไม่มี token
+        return;
+      }
+
       try {
         const colorsResponse = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain" },
+          headers: {
+            "Content-Type": "text/plain",
+            "Authorization": "Bearer " + token
+          },
           body: JSON.stringify({ action: "getAreasColors" })
         });
         if (!colorsResponse.ok) throw new Error("Failed to fetch colors");
@@ -222,7 +231,10 @@
       try {
         const areasResponse = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain" },
+          headers: {
+            "Content-Type": "text/plain",
+            "Authorization": "Bearer " + token
+          },
           body: JSON.stringify({ action: "getFoundAreas" })
         });
         if (!areasResponse.ok) throw new Error("Failed to fetch areas");
@@ -276,6 +288,12 @@
     }
 
     async function saveAreaColor() {
+      const token = localStorage.getItem("googleToken");
+      if (!token) {
+        window.location.href = "index.html";
+        return;
+      }
+
       const select = document.getElementById("areaName");
       const customInput = document.getElementById("customAreaName");
       const colorValue = document.getElementById("colorValue").value;
@@ -293,7 +311,10 @@
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain" },
+          headers: {
+            "Content-Type": "text/plain",
+            "Authorization": "Bearer " + token
+          },
           body: JSON.stringify({ action: "saveAreaColor", areaName, colorValue })
         });
         if (!response.ok) throw new Error("Failed to save color");
@@ -302,7 +323,10 @@
           document.getElementById("message").innerText = "Color saved successfully for " + areaName;
           const refreshResponse = await fetch(SCRIPT_URL, {
             method: "POST",
-            headers: { "Content-Type": "text/plain" },
+            headers: {
+              "Content-Type": "text/plain",
+              "Authorization": "Bearer " + token
+            },
             body: JSON.stringify({ action: "getAreasColors" })
           });
           if (!refreshResponse.ok) throw new Error("Failed to refresh colors");
@@ -321,11 +345,20 @@
     }
 
     async function deleteArea(area) {
+      const token = localStorage.getItem("googleToken");
+      if (!token) {
+        window.location.href = "index.html";
+        return;
+      }
+
       if (confirm(`Delete ${area}?`)) {
         try {
           const response = await fetch(SCRIPT_URL, {
             method: "POST",
-            headers: { "Content-Type": "text/plain" },
+            headers: {
+              "Content-Type": "text/plain",
+              "Authorization": "Bearer " + token
+            },
             body: JSON.stringify({ action: "deleteAreaColor", areaName: area })
           });
           if (!response.ok) throw new Error("Failed to delete color");
@@ -334,7 +367,10 @@
             document.getElementById("message").innerText = "Color deleted successfully for " + area;
             const refreshResponse = await fetch(SCRIPT_URL, {
               method: "POST",
-              headers: { "Content-Type": "text/plain" },
+              headers: {
+                "Content-Type": "text/plain",
+                "Authorization": "Bearer " + token
+              },
               body: JSON.stringify({ action: "getAreasColors" })
             });
             if (!refreshResponse.ok) throw new Error("Failed to refresh colors");

@@ -137,7 +137,7 @@
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyA0DHfA5un-KgORiWkSi1sJzIgg6N-XUYFB13Ogx_2z082XE_VAJ6eYKlt7gQX4dve/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwOReuujZq_1XlAY_Q7KeeHHK9RVHSB2C3aZY1theoX5zLOuk_V8hBiKbPY1y983nkl/exec";
 
     function onSignIn(response) {
       console.log("Sign-in successful");
@@ -189,7 +189,7 @@
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
           headers: {
-            "Content-Type": "text/plain", // แก้จาก text/plain เป็น application/json
+            "Content-Type": "application/json", // แก้จาก text/plain เป็น application/json
             "Authorization": "Bearer " + token
           },
           body: JSON.stringify({ action: "syncNotionToGoogleCalendar" })
@@ -208,7 +208,10 @@
         const logs = data.logs || [];
         notifications.innerHTML = logs.join('<br>');
       } catch (error) {
+        
         clearInterval(interval);
+        console.error("Full error:", error);
+        console.log("Response:", await response.text()); // เพิ่มบรรทัดนี้
         status.innerText = `❌ Error: ${error.message}`;
         console.error("Sync failed:", error);
         notifications.innerHTML = "Please check the console for more details.";

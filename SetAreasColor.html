@@ -29,6 +29,7 @@
       100% { background-position: 0% 50%; }
     }
     .navbar {
+      
       width: 100%;
       background: rgba(255, 255, 255, 0.1);
       padding: 16px 32px;
@@ -110,13 +111,14 @@
       font-size: 16px;
       font-weight: 400;
       color: #f8f8f8;
-      margin-bottom: 16px;
+      margin-top: 15px;
+      margin-bottom: 5px;
     }
     table {
       width: 100%;
       max-width: 480px;
       border-collapse: collapse;
-      margin-top: 24px;
+      margin-top: 5px;
       font-family: 'Nunito Sans', sans-serif;
       font-size: 16px;
       color: #f8f8f8;
@@ -188,7 +190,7 @@
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHT24tc03L3rdznfZwu0sflUaAUAVx8NNgDenWWkRlgV7kunatB3oeuaEmxR8uwy0T/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwnoRhBS_EEDYbgs8MtnLQnKkpzuK7WC2XFsz_3aflk0gFZlm2cOfyzIE4y3_VR4RaX/exec";
     const colorMap = {
       "1": "#7986CB",  // Lavender
       "2": "#33B679",  // Sage
@@ -320,6 +322,7 @@
 
     async function deleteArea(area) {
       if (confirm(`Delete ${area}?`)) {
+        try {
           const response = await fetch(SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain" },

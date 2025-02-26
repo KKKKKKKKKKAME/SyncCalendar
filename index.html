@@ -192,7 +192,7 @@
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json", // แก้จาก text/plain เป็น application/json
+            "Content-Type": "text/plain", // แก้จาก text/plain เป็น application/json
             "Authorization": "Bearer " + token
           },
           body: JSON.stringify({ action: "syncNotionToGoogleCalendar" })

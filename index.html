@@ -6,8 +6,10 @@
   <link rel="icon" href="https://kkkkkkkkkkame.github.io/SyncCalendar/favicon-32x32.png" sizes="32x32" type="image/png">
   <link rel="icon" href="https://kkkkkkkkkkame.github.io/SyncCalendar/favicon-48x48.png" sizes="48x48" type="image/png">
   <meta charset="UTF-8">
+  <meta name="google-signin-client_id" content="847566218770-pic8snut7tkcu4dmtqtqo6ij170c0447.apps.googleusercontent.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito+Sans:wght@400;500&family=Poppins:wght@700&display=swap" rel="stylesheet">
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
   <style>
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -136,9 +138,33 @@
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6mGXhL6HiMVp0zyL5xEp8F8WnYfEfeTdj-KCYFNNTmis9dxmpuq1N0s_EkFV_3UDV/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-phgCRB4thjYDWyeicWjrRMS7eTvFVi6J_XSD2pmYbMCxSNSZOKh0aBFlbsxgmPNZ/exec";
+
+    function onSignIn(googleUser) {
+      const id_token = googleUser.getAuthResponse().id_token;
+      localStorage.setItem("googleToken", id_token);
+      document.getElementById("loginDiv").style.display = "none";
+      document.getElementById("content").style.display = "block";
+      startSync(); // เริ่ม sync หลังล็อกอิน
+    }
+
+    function signOut() {
+      const auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(() => {
+        localStorage.removeItem("googleToken");
+        document.getElementById("loginDiv").style.display = "block";
+        document.getElementById("content").style.display = "none";
+      });
+    }
 
     async function startSync() {
+
+      const token = localStorage.getItem("googleToken");
+      if (!token) {
+        document.getElementById("status").innerText = "Please log in first!";
+        return;
+      }
+
       const progressBar = document.getElementById("progress-bar");
       const progressText = document.getElementById("progress-text");
       const status = document.getElementById("status");
@@ -183,14 +209,34 @@
       }
     }
 
-    window.onload = startSync;
+    window.onload = function() {
+      const token = localStorage.getItem("googleToken");
+      if (token) {
+        document.getElementById("loginDiv").style.display = "none";
+        document.getElementById("content").style.display = "block";
+        startSync();
+      }
+    }
   </script>
 </head>
 <body>
-  <div class="navbar">
-    <a href="index.html">Sync</a>
-    <a href="SetAreasColor.html">Set Area Color</a>
+  <div id="loginDiv" style="display: block;">
+    <div class="navbar">
+      <a href="index.html">Sync</a>
+      <a href="SetAreasColor.html">Set Area Color</a>
+    </div>
+    <div class="content">
+      <div class="title">Please Log In</div>
+      <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    </div>
   </div>
+  <div id="content" style="display: none;">
+    <div class="navbar">
+      <a href="index.html">Sync</a>
+      <a href="SetAreasColor.html">Set Area Color</a>
+      <a href="#" onclick="signOut()">Sign Out</a>
+    </div>
+
   <div class="content">
     <div class="title">Notion & Calendar Sync</div>
     <div class="progress">

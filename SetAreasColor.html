@@ -207,7 +207,7 @@
       try {
         const colorsResponse = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain" },
           body: JSON.stringify({ action: "getAreasColors" })
         });
         if (!colorsResponse.ok) throw new Error("Failed to fetch colors");
@@ -220,7 +220,7 @@
       try {
         const areasResponse = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain" },
           body: JSON.stringify({ action: "getFoundAreas" })
         });
         if (!areasResponse.ok) throw new Error("Failed to fetch areas");
@@ -291,7 +291,7 @@
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain" },
           body: JSON.stringify({ action: "saveAreaColor", areaName, colorValue })
         });
         if (!response.ok) throw new Error("Failed to save color");
@@ -300,7 +300,7 @@
           document.getElementById("message").innerText = "Color saved successfully for " + areaName;
           const refreshResponse = await fetch(SCRIPT_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "text/plain" },
             body: JSON.stringify({ action: "getAreasColors" })
           });
           if (!refreshResponse.ok) throw new Error("Failed to refresh colors");
@@ -323,7 +323,7 @@
         try {
           const response = await fetch(SCRIPT_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "text/plain" },
             body: JSON.stringify({ action: "deleteAreaColor", areaName: area })
           });
           if (!response.ok) throw new Error("Failed to delete color");
@@ -332,7 +332,7 @@
             document.getElementById("message").innerText = "Color deleted successfully for " + area;
             const refreshResponse = await fetch(SCRIPT_URL, {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: { "Content-Type": "text/plain" },
               body: JSON.stringify({ action: "getAreasColors" })
             });
             if (!refreshResponse.ok) throw new Error("Failed to refresh colors");

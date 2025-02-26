@@ -102,11 +102,19 @@
     .form-group button:hover {
       background: #026298;
     }
+    .message {
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: #f8f8f8;
+      margin-top: 15px;
+      margin-bottom: 5px;
+    }
     table {
       width: 100%;
       max-width: 480px;
       border-collapse: collapse;
-      margin-top: 24px;
+      margin-top: 5px;
       font-family: 'Nunito Sans', sans-serif;
       font-size: 16px;
       color: #f8f8f8;
@@ -178,7 +186,7 @@
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzY6eOLj1FGYsZsar3uk1Y3Swtj7zKvrbUB_BlwXfdp5OqQct-zTbIDPwhC1hLmrIeQ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6mGXhL6HiMVp0zyL5xEp8F8WnYfEfeTdj-KCYFNNTmis9dxmpuq1N0s_EkFV_3UDV/exec";
     const colorMap = {
       "1": "#7986CB",  // Lavender
       "2": "#33B679",  // Sage
@@ -204,7 +212,7 @@
         const areas = await colorsResponse.json();
         displayAreas(areas);
       } catch (error) {
-        alert("Error loading colors: " + error.message);
+        document.getElementById("message").innerText = "Error loading colors: " + error.message;
       }
 
       try {
@@ -218,23 +226,26 @@
         populateAreasDropdown(areasList);
       } catch (error) {
         console.error("Error loading areas:", error);
-        alert("Error loading areas: " + error.message);
+        document.getElementById("message").innerText = "Error loading areas: " + error.message;
       }
     };
 
     function displayAreas(areas) {
       const table = document.getElementById("areasTable");
       while (table.rows.length > 1) table.deleteRow(1);
-      for (let area in areas) {
-        const row = table.insertRow();
-        const cell1 = row.insertCell(0);
-        const cell2 = row.insertCell(1);
-        const cell3 = row.insertCell(2);
-        cell1.innerText = area;
-        const colorId = areas[area];
-        const colorHex = colorMap[colorId] || "#000000";
-        cell2.innerHTML = `<span class="color-preview" style="background-color: ${colorHex};"></span> ID: ${colorId} (${colorHex})`;
-        cell3.innerHTML = `<button onclick="deleteArea('${area}')">Delete</button>`;
+      // ตรวจสอบว่า areas เป็น object ที่มี properties หรือไม่
+      if (areas && typeof areas === 'object' && !Array.isArray(areas)) {
+        for (let area in areas) {
+          const row = table.insertRow();
+          const cell1 = row.insertCell(0);
+          const cell2 = row.insertCell(1);
+          const cell3 = row.insertCell(2);
+          cell1.innerText = area;
+          const colorId = areas[area];
+          const colorHex = colorMap[colorId] || "#000000";
+          cell2.innerHTML = `<span class="color-preview" style="background-color: ${colorHex};"></span> ID: ${colorId} (${colorHex})`;
+          cell3.innerHTML = `<button onclick="deleteArea('${area}')">Delete</button>`;
+        }
       }
     }
 
@@ -271,7 +282,7 @@
       }
 
       if (!areaName || !colorValue) {
-        alert("Please select or enter an Area Name and select a Color");
+        document.getElementById("message").innerText = "Please select or enter an Area Name and select a Color";
         return;
       }
 
@@ -284,6 +295,7 @@
         if (!response.ok) throw new Error("Failed to save color");
         const data = await response.json();
         if (data.success) {
+          document.getElementById("message").innerText = "Color saved successfully for " + areaName;
           const refreshResponse = await fetch(SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain" },
@@ -297,10 +309,10 @@
           customInput.style.display = "none";
           document.getElementById("colorValue").value = "1";
         } else {
-          alert("Error saving data: " + data.error);
+          document.getElementById("message").innerText = "Error saving data: " + data.error;
         }
       } catch (error) {
-        alert("Error saving data: " + error.message);
+        document.getElementById("message").innerText = "Error saving data: " + error.message;
       }
     }
 
@@ -315,12 +327,20 @@
           if (!response.ok) throw new Error("Failed to delete color");
           const data = await response.json();
           if (data.success) {
-            displayAreas(data);
+            document.getElementById("message").innerText = "Color deleted successfully for " + area;
+            const refreshResponse = await fetch(SCRIPT_URL, {
+              method: "POST",
+              headers: { "Content-Type": "text/plain" },
+              body: JSON.stringify({ action: "getAreasColors" })
+            });
+            if (!refreshResponse.ok) throw new Error("Failed to refresh colors");
+            const refreshedAreas = await refreshResponse.json();
+            displayAreas(refreshedAreas);
           } else {
-            alert("Error deleting data: " + data.error);
+            document.getElementById("message").innerText = "Error deleting data: " + data.error;
           }
         } catch (error) {
-          alert("Error deleting data: " + error.message);
+          document.getElementById("message").innerText = "Error deleting data: " + error.message;
         }
       }
     }
@@ -354,6 +374,7 @@
         <option value="11">Tomato (#D81B60)</option>
       </select>
       <button onclick="saveAreaColor()">Save</button>
+      <div id="message" class="message"></div>
     </div>
     <table id="areasTable">
       <tr><th>Area Name</th><th>Color</th><th>Action</th></tr>

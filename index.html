@@ -136,7 +136,7 @@
   </style>
   <script>
     <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyrlzFxrXZhJOHsVmNZJGhTQGCPAWtMn2D6KmLcKE-kd_1NJpswGlJAREDh3nDd5jhR/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzr1rPxflg8QI6vvdx80kVecxIBX3X4RruNsPcJeFvoBp_ftNYoET1FogSq3voms-U/exec";
 
     async function startSync() {
       const progressBar = document.getElementById("progress-bar");
@@ -158,20 +158,25 @@
       }, 200);
 
       try {
+        console.log("Sending request to:", SCRIPT_URL);
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain" },
+          headers: { 
+            "Content-Type": "text/plain",
+            "Origin": "https://kkkkkkkkkkame.github.io/SyncCalendar" // เพิ่ม Origin header ชัดเจน
+          },
           body: JSON.stringify({ action: "syncNotionToGoogleCalendar" })
         });
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        console.log("Response status:", response.status);
+        const text = await response.text(); // ดึง response เป็น text ก่อนเพื่อ debug
+        console.log("Raw response:", text);
 
-        const data = await response.json();
+        const data = JSON.parse(text); // แปลงเป็น JSON หลังจาก log
         clearInterval(interval);
         progressBar.style.width = "100%";
         progressText.innerText = "100%";
 
-        // ตรวจสอบว่า data มี error หรือไม่
         if (data.error) {
           status.innerText = `❌ Error: ${data.error}`;
           notifications.innerHTML = "Sync failed due to an error from the server.";

@@ -29,7 +29,6 @@
       100% { background-position: 0% 50%; }
     }
     .navbar {
-      
       width: 100%;
       background: rgba(255, 255, 255, 0.1);
       padding: 16px 32px;
@@ -111,14 +110,13 @@
       font-size: 16px;
       font-weight: 400;
       color: #f8f8f8;
-      margin-top: 15px;
-      margin-bottom: 5px;
+      margin-bottom: 16px;
     }
     table {
       width: 100%;
       max-width: 480px;
       border-collapse: collapse;
-      margin-top: 5px;
+      margin-top: 24px;
       font-family: 'Nunito Sans', sans-serif;
       font-size: 16px;
       color: #f8f8f8;
@@ -190,7 +188,7 @@
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUu7dKA_28lAQA84728BFp0FDQ0jEym7FcZE6dyFY0IvCjXz5NPMmnLk6e2PPzFrYf/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHe6GODFHvFv4pO2yMhHa1IpSPdkzTotZdSDE-XwkFYApPKzsZq7lVGAbHn26AbCnb/exec";
     const colorMap = {
       "1": "#7986CB",  // Lavender
       "2": "#33B679",  // Sage
@@ -206,19 +204,10 @@
     };
 
     window.onload = async function() {
-      const token = localStorage.getItem("googleToken");
-      if (!token) {
-        window.location.href = "index.html"; // กลับไปหน้า login ถ้าไม่มี token
-        return;
-      }
-
       try {
         const colorsResponse = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "text/plain",
-            "Authorization": "Bearer " + token
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: "getAreasColors" })
         });
         if (!colorsResponse.ok) throw new Error("Failed to fetch colors");
@@ -231,10 +220,7 @@
       try {
         const areasResponse = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "text/plain",
-            "Authorization": "Bearer " + token
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: "getFoundAreas" })
         });
         if (!areasResponse.ok) throw new Error("Failed to fetch areas");
@@ -288,12 +274,6 @@
     }
 
     async function saveAreaColor() {
-      const token = localStorage.getItem("googleToken");
-      if (!token) {
-        window.location.href = "index.html";
-        return;
-      }
-
       const select = document.getElementById("areaName");
       const customInput = document.getElementById("customAreaName");
       const colorValue = document.getElementById("colorValue").value;
@@ -311,10 +291,7 @@
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "text/plain",
-            "Authorization": "Bearer " + token
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: "saveAreaColor", areaName, colorValue })
         });
         if (!response.ok) throw new Error("Failed to save color");
@@ -323,10 +300,7 @@
           document.getElementById("message").innerText = "Color saved successfully for " + areaName;
           const refreshResponse = await fetch(SCRIPT_URL, {
             method: "POST",
-            headers: {
-              "Content-Type": "text/plain",
-              "Authorization": "Bearer " + token
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: "getAreasColors" })
           });
           if (!refreshResponse.ok) throw new Error("Failed to refresh colors");
@@ -345,20 +319,11 @@
     }
 
     async function deleteArea(area) {
-      const token = localStorage.getItem("googleToken");
-      if (!token) {
-        window.location.href = "index.html";
-        return;
-      }
-
       if (confirm(`Delete ${area}?`)) {
         try {
           const response = await fetch(SCRIPT_URL, {
             method: "POST",
-            headers: {
-              "Content-Type": "text/plain",
-              "Authorization": "Bearer " + token
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: "deleteAreaColor", areaName: area })
           });
           if (!response.ok) throw new Error("Failed to delete color");
@@ -367,10 +332,7 @@
             document.getElementById("message").innerText = "Color deleted successfully for " + area;
             const refreshResponse = await fetch(SCRIPT_URL, {
               method: "POST",
-              headers: {
-                "Content-Type": "text/plain",
-                "Authorization": "Bearer " + token
-              },
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ action: "getAreasColors" })
             });
             if (!refreshResponse.ok) throw new Error("Failed to refresh colors");

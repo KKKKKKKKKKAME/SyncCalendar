@@ -44,7 +44,7 @@
       color: #014871;
       text-decoration: none;
       transition: color 0.3s ease;
-      margin: 0 16px; /* เพิ่ม margin เพื่อให้ลิงก์ห่างกัน */
+      margin: 0 16px;
     }
     .navbar a:hover {
       color: #ffffff;
@@ -208,7 +208,8 @@
     function checkLogin() {
       const token = localStorage.getItem('authToken');
       if (token) {
-        verifyToken(token);
+        // ถ้ามี token ใน localStorage ให้แสดงเนื้อหาทันที โดยไม่ verify ทุกครั้ง
+        showContent();
       } else {
         showLogin();
       }
@@ -270,7 +271,7 @@
     function signOut() {
       localStorage.removeItem('authToken');
       google.accounts.id.disableAutoSelect();
-      window.location.reload(); // รีเฟรชหน้าเพื่อกลับไปที่หน้า login
+      window.location.reload();
     }
 
     async function loadContent() {
@@ -425,7 +426,7 @@
   <div id="main-content" style="display: none; flex-direction: column; width: 100%; align-items: center;">
     <div class="navbar">
       <a href="index.html">Back to Notion & Calendar Sync</a>
-      <a href="#" onclick="signOut()">Sign Out</a> <!-- เพิ่ม Sign Out -->
+      <a href="#" onclick="signOut()">Sign Out</a>
     </div>
     <div class="content">
       <div class="title">Manage Areas Colors</div>

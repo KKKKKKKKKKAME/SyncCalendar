@@ -8,10 +8,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito+Sans:wght@400;500&family=Poppins:wght@700&display=swap" rel="stylesheet">
-  <script src="https://apis.google.com/js/platform.js" async defer></script>
-  <meta name="google-signin-client_id" content="847566218770-pic8snut7tkcu4dmtqtqo6ij170c0447.apps.googleusercontent.com">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    /* คง CSS เดิมทั้งหมด */
+    /* CSS เดิมทั้งหมดคงไว้เหมือนเดิม */
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
@@ -199,6 +198,7 @@
   </style>
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQY1wHV8zXlBtDxtKvURlBxhSKnvlhomnspHnrFVtZB_RBgeKX400YQr2cOy4Z7hRM/exec";
+    const CLIENT_ID = "847566218770-pic8snut7tkcu4dmtqtqo6ij170c0447.apps.googleusercontent.com";
     const colorMap = {
       "1": "#7986CB", "2": "#33B679", "3": "#8E24AA", "4": "#E67C73", "5": "#F6BF26",
       "6": "#F5511D", "7": "#039BE5", "8": "#616161", "9": "#3F51B5", "10": "#0B8043", "11": "#D81B60"
@@ -216,16 +216,28 @@
     function showLogin() {
       document.getElementById('login-container').style.display = 'flex';
       document.getElementById('main-content').style.display = 'none';
+      renderSignInButton();
     }
 
     function showContent() {
       document.getElementById('login-container').style.display = 'none';
       document.getElementById('main-content').style.display = 'flex';
-      loadContent(); // เรียกโหลดข้อมูลเมื่อล็อกอินสำเร็จ
+      loadContent();
     }
 
-    function onSignIn(googleUser) {
-      const idToken = googleUser.getAuthResponse().id_token;
+    function renderSignInButton() {
+      google.accounts.id.initialize({
+        client_id: CLIENT_ID,
+        callback: handleCredentialResponse
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('signin-button'),
+        { theme: 'outline', size: 'large' }
+      );
+    }
+
+    function handleCredentialResponse(response) {
+      const idToken = response.credential;
       verifyToken(idToken);
     }
 
@@ -233,7 +245,7 @@
       fetch(SCRIPT_URL, {
         method: "POST",
         body: JSON.stringify({ action: "verifyToken", token: token }),
-        headers: { "Content-Type": "text/plain" }
+        headers: { "Content-Type": "application/json" }
       })
       .then(response => response.json())
       .then(data => {
@@ -243,7 +255,6 @@
         } else {
           alert("เฉพาะ rachata.jns@gmail.com เท่านั้นที่เข้าใช้งานได้");
           localStorage.removeItem('authToken');
-          gapi.auth2.getAuthInstance().signOut();
           showLogin();
         }
       })
@@ -397,12 +408,12 @@
       }
     }
 
-    window.onload = checkLogin; // เปลี่ยนเป็น checkLogin
+    window.onload = checkLogin;
   </script>
 </head>
 <body>
   <div id="login-container" style="display: none;">
-    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    <div id="signin-button"></div>
   </div>
   <div id="main-content" style="display: none; flex-direction: column; width: 100%; align-items: center;">
     <div class="navbar">

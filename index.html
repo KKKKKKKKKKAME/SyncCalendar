@@ -8,7 +8,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito+Sans:wght@400;500&family=Poppins:wght@700&display=swap" rel="stylesheet">
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <meta name="google-signin-client_id" content="847566218770-pic8snut7tkcu4dmtqtqo6ij170c0447.apps.googleusercontent.com">
   <style>
+    /* คง CSS เดิมทั้งหมด */
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
@@ -111,6 +114,12 @@
       font-weight: 500;
       color: #ffffff;
     }
+    #login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
     @media (max-width: 768px) {
       .navbar {
         padding: 12px 24px;
@@ -135,7 +144,59 @@
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwc7V56dSc9YLjzZgOFDbL0NiTbK1Iq_4f2GFeL1Vba-SQl4OPNOQv9HeARjs9MR6KP/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQY1wHV8zXlBtDxtKvURlBxhSKnvlhomnspHnrFVtZB_RBgeKX400YQr2cOy4Z7hRM/exec";
+
+    // ฟังก์ชันตรวจสอบการล็อกอิน
+    function checkLogin() {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        verifyToken(token);
+      } else {
+        showLogin();
+      }
+    }
+
+    function showLogin() {
+      document.getElementById('login-container').style.display = 'flex';
+      document.getElementById('main-content').style.display = 'none';
+    }
+
+    function showContent() {
+      document.getElementById('login-container').style.display = 'none';
+      document.getElementById('main-content').style.display = 'flex';
+      startSync(); // เรียกฟังก์ชัน sync เดิมเมื่อล็อกอินสำเร็จ
+    }
+
+    function onSignIn(googleUser) {
+      const idToken = googleUser.getAuthResponse().id_token;
+      verifyToken(idToken);
+    }
+
+    function verifyToken(token) {
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "verifyToken", token: token }),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.authorized) {
+          localStorage.setItem('authToken', token);
+          showContent();
+        } else {
+          alert("เฉพาะ rachata.jns@gmail.com เท่านั้นที่เข้าใช้งานได้");
+          localStorage.removeItem('authToken');
+          gapi.auth2.getAuthInstance().signOut();
+          showLogin();
+        }
+      })
+      .catch(error => {
+        console.error("Error verifying token:", error);
+        alert("เกิดข้อผิดพลาดในการล็อกอิน");
+        localStorage.removeItem('authToken');
+        showLogin();
+      });
+    }
 
     async function startSync() {
       const progressBar = document.getElementById("progress-bar");
@@ -159,7 +220,7 @@
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain" }, // เปลี่ยนกลับเป็น application/json
+          headers: { "Content-Type": "text/plain" },
           body: JSON.stringify({ action: "syncNotionToGoogleCalendar" })
         });
 
@@ -172,7 +233,6 @@
         status.innerText = data.message;
 
         const logs = data.logs || [];
-
         notifications.innerHTML = logs.join('<br>');
       } catch (error) {
         clearInterval(interval);
@@ -182,22 +242,27 @@
       }
     }
 
-    window.onload = startSync;
+    window.onload = checkLogin; // เปลี่ยนจาก startSync เป็น checkLogin
   </script>
 </head>
 <body>
-  <div class="navbar">
-    <a href="index.html">Sync</a>
-    <a href="SetAreasColor.html">Set Area Color</a>
+  <div id="login-container" style="display: none;">
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
   </div>
-  <div class="content">
-    <div class="title">Notion & Calendar Sync</div>
-    <div class="progress">
-      <div id="progress-bar" class="progress-bar"></div>
+  <div id="main-content" style="display: none; flex-direction: column; width: 100%; align-items: center;">
+    <div class="navbar">
+      <a href="index.html">Sync</a>
+      <a href="SetAreasColor.html">Set Area Color</a>
     </div>
-    <div id="progress-text" class="progress-text">0%</div>
-    <div id="status"></div>
-    <div id="notifications" class="notifications"></div>
+    <div class="content">
+      <div class="title">Notion & Calendar Sync</div>
+      <div class="progress">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+      <div id="progress-text" class="progress-text">0%</div>
+      <div id="status"></div>
+      <div id="notifications" class="notifications"></div>
+    </div>
   </div>
 </body>
 </html>

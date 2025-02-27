@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito+Sans:wght@400;500&family=Poppins:wght@700&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    /* CSS เดิมทั้งหมด */
+    /* คง CSS อื่น ๆ ไว้เหมือนเดิม */
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
@@ -56,9 +56,10 @@
       padding: 32px;
       box-sizing: border-box;
       flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      display: flex; /* คงค่าเดิม */
+      flex-direction: column; /* คงค่าเดิม */
+      justify-content: center; /* คงค่าเดิมเพื่อให้เนื้อหาอยู่กึ่งกลางแนวตั้ง */
+      align-items: center; /* เพิ่มเพื่อให้กึ่งกลางแนวนอน */
     }
     .title {
       font-family: 'Poppins', sans-serif;
@@ -67,7 +68,6 @@
       color: #333333;
       margin-bottom: 24px;
       line-height: 1.2;
-      
     }
     .progress {
       width: 200px;
@@ -127,6 +127,13 @@
       font-weight: 500;
       color: #014871;
       margin-bottom: 20px;
+    }
+    #main-content {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      min-height: 100vh; /* เพิ่มเพื่อให้ครอบคลุมความสูงทั้งหน้า */
+      justify-content: space-between; /* ปรับเพื่อให้ navbar อยู่ด้านบน และ content อยู่กึ่งกลาง */
     }
     @media (max-width: 768px) {
       .navbar {

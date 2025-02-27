@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito+Sans:wght@400;500&family=Poppins:wght@700&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    /* CSS เดิมทั้งหมดคงไว้เหมือนเดิม */
+    /* CSS เดิมทั้งหมด */
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
@@ -115,9 +115,17 @@
     }
     #login-container {
       display: flex;
+      flex-direction: column; /* ปรับให้เป็น column เพื่อให้ "Sign In" อยู่ด้านบน */
       justify-content: center;
       align-items: center;
       height: 100vh;
+    }
+    #login-container h2 {
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 24px;
+      font-weight: 500;
+      color: #014871;
+      margin-bottom: 20px;
     }
     @media (max-width: 768px) {
       .navbar {
@@ -208,6 +216,12 @@
       });
     }
 
+    function signOut() {
+      localStorage.removeItem('authToken');
+      google.accounts.id.disableAutoSelect();
+      window.location.reload(); // รีเฟรชหน้าเพื่อกลับไปที่หน้า login
+    }
+
     async function startSync() {
       const progressBar = document.getElementById("progress-bar");
       const progressText = document.getElementById("progress-text");
@@ -257,12 +271,14 @@
 </head>
 <body>
   <div id="login-container" style="display: none;">
+    <h2>Sign In</h2> <!-- เพิ่มคำว่า Sign In -->
     <div id="signin-button"></div>
   </div>
   <div id="main-content" style="display: none; flex-direction: column; width: 100%; align-items: center;">
     <div class="navbar">
       <a href="index.html">Sync</a>
       <a href="SetAreasColor.html">Set Area Color</a>
+      <a href="#" onclick="signOut()">Sign Out</a> <!-- เพิ่ม Sign Out -->
     </div>
     <div class="content">
       <div class="title">Notion & Calendar Sync</div>

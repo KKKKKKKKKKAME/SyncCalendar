@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito+Sans:wght@400;500&family=Poppins:wght@700&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    /* CSS เดิมทั้งหมด */
+    /* CSS จากโค้ดต้นฉบับ ปรับให้ navbar และ content อยู่กึ่งกลาง */
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
@@ -157,7 +157,6 @@
     function checkLogin() {
       const token = localStorage.getItem('authToken');
       if (token) {
-        // ถ้ามี token ใน localStorage ให้แสดงเนื้อหาทันที โดยไม่ verify ทุกครั้ง
         showContent();
       } else {
         showLogin();
@@ -172,7 +171,7 @@
 
     function showContent() {
       document.getElementById('login-container').style.display = 'none';
-      document.getElementById('main-content').style.display = 'flex';
+      document.getElementById('main-content').style.display = 'block'; // เปลี่ยนจาก flex เป็น block
       startSync();
     }
 
@@ -275,7 +274,7 @@
     <h2>Sign In</h2>
     <div id="signin-button"></div>
   </div>
-  <div id="main-content" style="display: none; flex-direction: column; width: 100%; align-items: center;">
+  <div id="main-content" style="display: none;"> <!-- ลบ flex-direction และ width ออก -->
     <div class="navbar">
       <a href="index.html">Sync</a>
       <a href="SetAreasColor.html">Set Area Color</a>

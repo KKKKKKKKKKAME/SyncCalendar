@@ -115,7 +115,7 @@
     }
     #login-container {
       display: flex;
-      flex-direction: column; /* ปรับให้เป็น column เพื่อให้ "Sign In" อยู่ด้านบน */
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
@@ -157,7 +157,8 @@
     function checkLogin() {
       const token = localStorage.getItem('authToken');
       if (token) {
-        verifyToken(token);
+        // ถ้ามี token ใน localStorage ให้แสดงเนื้อหาทันที โดยไม่ verify ทุกครั้ง
+        showContent();
       } else {
         showLogin();
       }
@@ -219,7 +220,7 @@
     function signOut() {
       localStorage.removeItem('authToken');
       google.accounts.id.disableAutoSelect();
-      window.location.reload(); // รีเฟรชหน้าเพื่อกลับไปที่หน้า login
+      window.location.reload();
     }
 
     async function startSync() {
@@ -271,14 +272,14 @@
 </head>
 <body>
   <div id="login-container" style="display: none;">
-    <h2>Sign In</h2> <!-- เพิ่มคำว่า Sign In -->
+    <h2>Sign In</h2>
     <div id="signin-button"></div>
   </div>
   <div id="main-content" style="display: none; flex-direction: column; width: 100%; align-items: center;">
     <div class="navbar">
       <a href="index.html">Sync</a>
       <a href="SetAreasColor.html">Set Area Color</a>
-      <a href="#" onclick="signOut()">Sign Out</a> <!-- เพิ่ม Sign Out -->
+      <a href="#" onclick="signOut()">Sign Out</a>
     </div>
     <div class="content">
       <div class="title">Notion & Calendar Sync</div>

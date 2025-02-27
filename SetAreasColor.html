@@ -8,7 +8,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito+Sans:wght@400;500&family=Poppins:wght@700&display=swap" rel="stylesheet">
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <meta name="google-signin-client_id" content="847566218770-pic8snut7tkcu4dmtqtqo6ij170c0447.apps.googleusercontent.com">
   <style>
+    /* คง CSS เดิมทั้งหมด */
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
@@ -29,7 +32,6 @@
       100% { background-position: 0% 50%; }
     }
     .navbar {
-      
       width: 100%;
       background: rgba(255, 255, 255, 0.1);
       padding: 16px 32px;
@@ -162,6 +164,12 @@
     table button:hover {
       background: #026298;
     }
+    #login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
     @media (max-width: 768px) {
       .navbar {
         padding: 12px 24px;
@@ -190,22 +198,64 @@
     }
   </style>
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwc7V56dSc9YLjzZgOFDbL0NiTbK1Iq_4f2GFeL1Vba-SQl4OPNOQv9HeARjs9MR6KP/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxQY1wHV8zXlBtDxtKvURlBxhSKnvlhomnspHnrFVtZB_RBgeKX400YQr2cOy4Z7hRM/exec";
     const colorMap = {
-      "1": "#7986CB",  // Lavender
-      "2": "#33B679",  // Sage
-      "3": "#8E24AA",  // Grape
-      "4": "#E67C73",  // Flamingo
-      "5": "#F6BF26",  // Banana
-      "6": "#F5511D",  // Tangerine
-      "7": "#039BE5",  // Peacock
-      "8": "#616161",  // Graphite
-      "9": "#3F51B5",  // Blueberry
-      "10": "#0B8043", // Basil
-      "11": "#D81B60"  // Tomato
+      "1": "#7986CB", "2": "#33B679", "3": "#8E24AA", "4": "#E67C73", "5": "#F6BF26",
+      "6": "#F5511D", "7": "#039BE5", "8": "#616161", "9": "#3F51B5", "10": "#0B8043", "11": "#D81B60"
     };
 
-    window.onload = async function() {
+    function checkLogin() {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        verifyToken(token);
+      } else {
+        showLogin();
+      }
+    }
+
+    function showLogin() {
+      document.getElementById('login-container').style.display = 'flex';
+      document.getElementById('main-content').style.display = 'none';
+    }
+
+    function showContent() {
+      document.getElementById('login-container').style.display = 'none';
+      document.getElementById('main-content').style.display = 'flex';
+      loadContent(); // เรียกโหลดข้อมูลเมื่อล็อกอินสำเร็จ
+    }
+
+    function onSignIn(googleUser) {
+      const idToken = googleUser.getAuthResponse().id_token;
+      verifyToken(idToken);
+    }
+
+    function verifyToken(token) {
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "verifyToken", token: token }),
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.authorized) {
+          localStorage.setItem('authToken', token);
+          showContent();
+        } else {
+          alert("เฉพาะ rachata.jns@gmail.com เท่านั้นที่เข้าใช้งานได้");
+          localStorage.removeItem('authToken');
+          gapi.auth2.getAuthInstance().signOut();
+          showLogin();
+        }
+      })
+      .catch(error => {
+        console.error("Error verifying token:", error);
+        alert("เกิดข้อผิดพลาดในการล็อกอิน");
+        localStorage.removeItem('authToken');
+        showLogin();
+      });
+    }
+
+    async function loadContent() {
       try {
         const colorsResponse = await fetch(SCRIPT_URL, {
           method: "POST",
@@ -232,12 +282,11 @@
         console.error("Error loading areas:", error);
         document.getElementById("message").innerText = "Error loading areas: " + error.message;
       }
-    };
+    }
 
     function displayAreas(areas) {
       const table = document.getElementById("areasTable");
       while (table.rows.length > 1) table.deleteRow(1);
-      // ตรวจสอบว่า areas เป็น object ที่มี properties หรือไม่
       if (areas && typeof areas === 'object' && !Array.isArray(areas)) {
         for (let area in areas) {
           const row = table.insertRow();
@@ -254,7 +303,6 @@
     }
 
     function populateAreasDropdown(areas) {
-      console.log("Received areas:", areas);
       const select = document.getElementById("areaName");
       areas.forEach(area => {
         const option = document.createElement("option");
@@ -348,41 +396,48 @@
         }
       }
     }
+
+    window.onload = checkLogin; // เปลี่ยนเป็น checkLogin
   </script>
 </head>
 <body>
-  <div class="navbar">
-    <a href="index.html">Back to Notion & Calendar Sync</a>
+  <div id="login-container" style="display: none;">
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
   </div>
-  <div class="content">
-    <div class="title">Manage Areas Colors</div>
-    <div class="form-group">
-      <label>Area Name</label>
-      <select id="areaName">
-        <option value="">-- Select or type new Area --</option>
-        <option value="Not found Areas">Not found Areas</option>
-      </select>
-      <input type="text" id="customAreaName" placeholder="Or type new Area" style="display: none;" />
-      <label>Color</label>
-      <select id="colorValue">
-        <option value="1">Lavender (#7986CB)</option>
-        <option value="2">Sage (#33B679)</option>
-        <option value="3">Grape (#8E24AA)</option>
-        <option value="4">Flamingo (#E67C73)</option>
-        <option value="5">Banana (#F6BF26)</option>
-        <option value="6">Tangerine (#F5511D)</option>
-        <option value="7">Peacock (#039BE5)</option>
-        <option value="8">Graphite (#616161)</option>
-        <option value="9">Blueberry (#3F51B5)</option>
-        <option value="10">Basil (#0B8043)</option>
-        <option value="11">Tomato (#D81B60)</option>
-      </select>
-      <button onclick="saveAreaColor()">Save</button>
-      <div id="message" class="message"></div>
+  <div id="main-content" style="display: none; flex-direction: column; width: 100%; align-items: center;">
+    <div class="navbar">
+      <a href="index.html">Back to Notion & Calendar Sync</a>
     </div>
-    <table id="areasTable">
-      <tr><th>Area Name</th><th>Color</th><th>Action</th></tr>
-    </table>
+    <div class="content">
+      <div class="title">Manage Areas Colors</div>
+      <div class="form-group">
+        <label>Area Name</label>
+        <select id="areaName">
+          <option value="">-- Select or type new Area --</option>
+          <option value="Not found Areas">Not found Areas</option>
+        </select>
+        <input type="text" id="customAreaName" placeholder="Or type new Area" style="display: none;" />
+        <label>Color</label>
+        <select id="colorValue">
+          <option value="1">Lavender (#7986CB)</option>
+          <option value="2">Sage (#33B679)</option>
+          <option value="3">Grape (#8E24AA)</option>
+          <option value="4">Flamingo (#E67C73)</option>
+          <option value="5">Banana (#F6BF26)</option>
+          <option value="6">Tangerine (#F5511D)</option>
+          <option value="7">Peacock (#039BE5)</option>
+          <option value="8">Graphite (#616161)</option>
+          <option value="9">Blueberry (#3F51B5)</option>
+          <option value="10">Basil (#0B8043)</option>
+          <option value="11">Tomato (#D81B60)</option>
+        </select>
+        <button onclick="saveAreaColor()">Save</button>
+        <div id="message" class="message"></div>
+      </div>
+      <table id="areasTable">
+        <tr><th>Area Name</th><th>Color</th><th>Action</th></tr>
+      </table>
+    </div>
   </div>
 </body>
 </html>
